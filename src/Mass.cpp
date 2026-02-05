@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -57,6 +58,11 @@ class Mass
     sf::Vector2f get_acc()
     {
         return info.acceleration;
+    }
+
+    float get_mass()
+    {
+        return info.mass;
     }
 
 };

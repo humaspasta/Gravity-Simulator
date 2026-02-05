@@ -1,70 +1,61 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include "Mass.cpp"
+
 
 
 int main() {
    std::srand(std::time(0));
-
     std::cout << "Hello";
     sf::RenderWindow window(sf::VideoMode({800, 800}), "SFML works!"); //this command builds a window of size 800 x 800
-    sf::CircleShape shape(20.f);
-    shape.setFillColor(sf::Color::White);
     sf::Vector2f sizeinfo = (sf::Vector2f)window.getSize(); //unsigned 2d vector that stores window size info
-    sf::Vector2f curr_pos = {0.0,0.0}; //
-    sf::Vector2f velocity = {1.0,1.0};
 
-    struct 
-    { //struct that stores information about the motion of a point mass 
-        sf::Vector2f position; //position, velocity, acceleration stored as 2d vectors. 
-        sf::Vector2f velocity;
-        sf::Vector2f acceleration;
-        unsigned int size;
-        unsigned int mass;
 
-    } pnt;
-    
-        pnt.position = { (float)((std::rand() % 200) + 1), (float)((std::rand() % 200) + 1)};
-        pnt.velocity = {1.f,1.f};
-        pnt.acceleration = {0.5,0.5};
-        pnt.size = 2.f;
-        pnt.mass = 0.f;
+    std::vector<Mass>masses;
+
+
+    for(int i = 0; i < 3; i++)
+    {
+        float posx = std::rand() % (int)sizeinfo.x;
+        float posy = std::rand() % (int)sizeinfo.y;
+        float velx = 0;
+        float vely = 0;
+        float accx = 0;
+        float accy = 0;
+        float size_ = 4;
+        float mass_ = size_ * 1e10; //mass proportional to size
+
+        Mass m(posx , posy , velx , vely , accx , accy , size_ , mass_);
+        masses.push_back(m);
+    }
+
+;
 
     while(window.isOpen())
     {
         
-   
-
+        
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
         }
         
-        if(pnt.position.x + pnt.size > sizeinfo.x || pnt.position.x - pnt.size < 0)
+        window.clear(sf::Color::Black);
+        for(int i = 0; i < masses.size(); i++)
         {
-            pnt.velocity.x = -1 * pnt.velocity.x;
+            // sf::CircleShape shape;
+            // Mass m = masses[i];
+            // shape.setRadius(m.get_mass() / 1e10); //set radius proportional to mass
+            // shape.setPosition(m.get_pos());
+            // shape.setFillColor(sf::Color::White);
+            // calc.calculate_and_update();
+            // calc.update_positions();
+            // window.draw(shape);
         }
-        
-        if(pnt.position.y + pnt.size> sizeinfo.y || pnt.position.y - pnt.size < 0)
-        {
-            pnt.velocity.y = -1 * pnt.velocity.y;
-        }
-
-        pnt.position.x += pnt.velocity.x;
-        pnt.position.y += pnt.velocity.y;
-
-        std::cout << pnt.position.x <<std::endl;
-        std::cout << pnt.position.y << std::endl;
-
-        std::cout <<"" <<std::endl;
-
-        
        
-       window.clear(sf::Color::Black);
-        shape.setPosition(pnt.position);
-        window.draw(shape);
-     
+
         window.display();
     }
 }
