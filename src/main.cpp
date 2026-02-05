@@ -1,17 +1,18 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include "Mass.cpp"
+#include "Mass.hpp"
+#include "Calculations.hpp"
 
 
 
 int main() {
    std::srand(std::time(0));
     std::cout << "Hello";
-    sf::RenderWindow window(sf::VideoMode({800, 800}), "SFML works!"); //this command builds a window of size 800 x 800
+    sf::RenderWindow window(sf::VideoMode({2000, 2000}), "SFML works!"); //this command builds a window of size 800 x 800
     sf::Vector2f sizeinfo = (sf::Vector2f)window.getSize(); //unsigned 2d vector that stores window size info
 
-
+    
     std::vector<Mass>masses;
 
 
@@ -30,7 +31,8 @@ int main() {
         masses.push_back(m);
     }
 
-;
+    
+    Calculations calc(masses);
 
     while(window.isOpen())
     {
@@ -45,14 +47,14 @@ int main() {
         window.clear(sf::Color::Black);
         for(int i = 0; i < masses.size(); i++)
         {
-            // sf::CircleShape shape;
-            // Mass m = masses[i];
-            // shape.setRadius(m.get_mass() / 1e10); //set radius proportional to mass
-            // shape.setPosition(m.get_pos());
-            // shape.setFillColor(sf::Color::White);
-            // calc.calculate_and_update();
-            // calc.update_positions();
-            // window.draw(shape);
+            sf::CircleShape shape;
+            Mass m = masses[i];
+            shape.setRadius(m.get_mass() / 1e10); //set radius proportional to mass
+            shape.setPosition(m.get_pos());
+            shape.setFillColor(sf::Color::White);
+            calc.calculate_and_update();
+            calc.update_positions();
+            window.draw(shape);
         }
        
 

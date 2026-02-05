@@ -3,43 +3,42 @@
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include "Mass.hpp"
+#include "Calculations.hpp"
 
-class Calculations
+Calculations::Calculations(std::vector<Mass> &masses_in)
 {
-    const double G = 6.6743e-11;
-    const double dt = 0.001; //time step
+    points = &masses_in;
+}
 
-    std::vector<Mass> points;
-
-    public:
-    Calculations(std::vector<Mass> masses_in)
+    void Calculations::update_positions()
     {
-       points = masses_in;
-    }
-
-    void update_positions()
-    {
-        for(int i = 0; i < points.size(); i++)
+        for(int i = 0; i < points->size(); i++)
         {
-            points[i].set_vel(points[i].get_velocity().x + points[i].get_acc().x * dt , points[i].get_velocity().y + points[i].get_acc().y * dt);
-            points[i].set_pos(points[i].get_pos().x + points[i].get_velocity().x * dt , points[i].get_pos().y + points[i].get_velocity().y * dt);
+            Mass& m = (*points)[i];
+
+            m.set_vel(m.get_velocity().x + m.get_acc().x * dt , m.get_velocity().y + m.get_acc().y * dt);
+            m.set_pos(m.get_pos().x + m.get_velocity().x * dt , m.get_pos().y +m.get_velocity().y * dt);
         }
     }
 
     /*
     Calculates force between every pair of points and updates the acceleration vector of each accordingly
     */
-    void calculate_and_update() //this is O(n^2)
+    void Calculations::calculate_and_update() //this is O(n^2)
     {
-        for(int i = 0; i < points.size(); i++)
+
+        for(int i = 0; i < points->size(); i++)
         {
-            for(int j = 0; j < points.size(); j++)
-            
+            for(int j = i + 1; j < points->size(); j++)
+            {
                 if(i != j)
                 { //update all pairs to get net acceleration on each
-                    sf::Vector2f force = calculate_force(points[i] , points[j]);
-                    points[i].set_acc(m1.get_acc().x + (force.x / m1.get_mass()) , m1.get_acc().y + (force.y / m1.get_mass()));
-                    points[j].set_acc(m2.get_acc().x + (force.x / m2.get_mass()) , m2.get_acc().y + (force.y / m2.get_mass())); //adds to current acceleration
+                    Mass&m1 = (*points)[i];
+                    Mass&m2 = (*points)[j];
+                    
+                    sf::Vector2f force = calculate_force(m1 , m2);
+                    m1.set_acc(m1.get_acc().x + (force.x / m1.get_mass()) , m1.get_acc().y + (force.y / m1.get_mass()));
+                    m2.set_acc(m2.get_acc().x - (force.x / m2.get_mass()) , m2.get_acc().y - (force.y / m2.get_mass())); //adds to current acceleration
                 }
             }
         }
@@ -48,29 +47,34 @@ class Calculations
     /*
     Function that returns a force vector between two masses
     */
-    sf::Vector2f calculate_force(Mass m1 , Mass m2) 
-    {
-        float theta1 = calc_theta(m1, m2);
+   sf::Vector2f Calculations::calculate_force(Mass& m1, Mass& m2) const
+{
+    sf::Vector2f delta = m2.get_pos() - m1.get_pos(); // direction from m1 to m2
+    float distance = sqrt(delta.x * delta.x + delta.y * delta.y);
 
-        float distance = dist(m1 , m2);
-        float force = (G*m1.get_mass() * m2.get_mass()) / pow(distance , 2);
+    // prevent division by zero
+    if (distance < 1e-5f) distance = 1e-5f;
 
-        sf::Vector2f vect = {force * std::cos(theta1) , force * std::sin(theta1)};
+    float magnitude = (G * m1.get_mass() * m2.get_mass()) / (distance * distance);
 
-        return vect;
-    }
+    // normalized direction * magnitude
+    sf::Vector2f force = magnitude * (delta / distance);
 
-    float dist(Mass m1, Mass m2)
+    return force; // force on m1 due to m2
+}
+
+
+    float Calculations::dist(Mass& m1, Mass& m2) const
     {
         return sqrtf(pow(m1.get_pos().x - m2.get_pos().x , 2) + pow(m1.get_pos().y - m2.get_pos().y , 2));
     }
 
-    float norm(sf::Vector2f vector)
+    float Calculations::norm(sf::Vector2f vector) const
     {
         return sqrtf(pow(vector.x , 2) + pow(vector.y , 2));
     }
 
-    float calc_theta(Mass m1, Mass m2)
+    float Calculations::calc_theta(Mass& m1, Mass& m2) const
     {
         sf::Vector2f pos1 = m1.get_pos();
         sf::Vector2f pos2 = m2.get_pos();
@@ -81,5 +85,3 @@ class Calculations
         return theta;
     }
     
-
-};
