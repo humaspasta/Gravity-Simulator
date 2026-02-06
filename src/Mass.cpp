@@ -49,3 +49,9 @@
     {
         return info.mass;
     }
+
+    
+    float Mass::get_size() const
+    {
+        return info.size;
+    }

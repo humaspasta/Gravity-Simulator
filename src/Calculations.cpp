@@ -5,9 +5,10 @@
 #include "Mass.hpp"
 #include "Calculations.hpp"
 
-Calculations::Calculations(std::vector<Mass> &masses_in)
+Calculations::Calculations(std::vector<Mass> &masses_in) 
 {
     points = &masses_in;
+    com = {0.f,0.f};
 }
 
     void Calculations::update_positions()
@@ -15,9 +16,9 @@ Calculations::Calculations(std::vector<Mass> &masses_in)
         for(int i = 0; i < points->size(); i++)
         {
             Mass& m = (*points)[i];
-
-            m.set_vel(m.get_velocity().x + m.get_acc().x * dt , m.get_velocity().y + m.get_acc().y * dt);
-            m.set_pos(m.get_pos().x + m.get_velocity().x * dt , m.get_pos().y +m.get_velocity().y * dt);
+            
+            m.set_vel(m.get_velocity().x + m.get_acc().x * dt , m.get_velocity().y + m.get_acc().y * dt ); //constant to scale speed is 1/10
+            m.set_pos(m.get_pos().x + m.get_velocity().x * dt  , m.get_pos().y +m.get_velocity().y * dt);
         }
     }
 
@@ -37,8 +38,8 @@ Calculations::Calculations(std::vector<Mass> &masses_in)
                     Mass&m2 = (*points)[j];
                     
                     sf::Vector2f force = calculate_force(m1 , m2);
-                    m1.set_acc(m1.get_acc().x + (force.x / m1.get_mass()) , m1.get_acc().y + (force.y / m1.get_mass()));
-                    m2.set_acc(m2.get_acc().x - (force.x / m2.get_mass()) , m2.get_acc().y - (force.y / m2.get_mass())); //adds to current acceleration
+                    m1.set_acc(m1.get_acc().x + (force.x / m1.get_mass())  , m1.get_acc().y + (force.y / m1.get_mass()));
+                    m2.set_acc(m2.get_acc().x  - (force.x / m2.get_mass())  , m2.get_acc().y  - (force.y / m2.get_mass())); //adds to current acceleration
                 }
             }
         }
@@ -69,6 +70,7 @@ Calculations::Calculations(std::vector<Mass> &masses_in)
         return sqrtf(pow(m1.get_pos().x - m2.get_pos().x , 2) + pow(m1.get_pos().y - m2.get_pos().y , 2));
     }
 
+
     float Calculations::norm(sf::Vector2f vector) const
     {
         return sqrtf(pow(vector.x , 2) + pow(vector.y , 2));
@@ -84,4 +86,29 @@ Calculations::Calculations(std::vector<Mass> &masses_in)
         float theta = std::atan2f(delta.y , delta.x);
         return theta;
     }
+
+    void Calculations::calculate_com() 
+    {
+        float t_mass = 0;
+        float mx = 0;
+        float my = 0;
+
+        for(int i = 0; i < points->size(); i++)
+        {
+            Mass& pnt = (*points)[i];
+            t_mass += pnt.get_mass();
+            mx += pnt.get_pos().x * pnt.get_mass();
+            my += pnt.get_pos().y * pnt.get_mass();
+        }
+
+       com.x = mx / t_mass;
+       com.y = my / t_mass; 
+    }
+
+    sf::Vector2f Calculations::get_com() const
+    {
+        return com;
+    }
+
+  
     
